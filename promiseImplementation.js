@@ -4,14 +4,14 @@ class FakePromise {
     this.result = undefined;
     this.onFulfilledCallbacks = [];
     this.onRejectedCallbacks = [];
-    function resolve(res) {
+    const resolve = (res) => {
       if (this.status === 'pending') {
         this.pending = 'fulfilled';
         this.result = res;
         this.onFulfilledCallbacks.forEach(fn => fn(res));
       }
     }
-    function reject(error) {
+    const reject = (error) => {
       if (this.status === 'pending') {
         this.pending = 'rejected';
         this.result = error;
@@ -68,19 +68,32 @@ class FakePromise {
   }
 }
 
-const p1 = new Promise((resolve, reject) => {
+const p1 = new FakePromise((resolve, reject) => {
   resolve('resolved!');
 });
-const p2 = new Promise((resolve, reject) => {
+const p2 = new FakePromise((resolve, reject) => {
   reject('rejected!')
 })
+
 p1.then((res) => {
   console.log(res);
 }, (err) => {
   console.log(err);
 });
-p2.then((res) => {
+
+const p3 = new FakePromise((resolve, reject) => {
+  setTimeout(() => resolve('resolved!'), 1000);
+});
+p3.then((res) => {
   console.log(res);
 }, (err) => {
   console.log(err);
 });
+
+const p = new FakePromise((resolve, reject) => {
+  setTimeout(() => resolve('resolved first one'), 1000);
+});
+p.then((res) => {
+  console.log(res);
+  return 5
+}).then(res => console.log(res))
