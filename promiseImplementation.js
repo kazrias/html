@@ -6,14 +6,14 @@ class FakePromise {
     this.onRejectedCallbacks = [];
     const resolve = (res) => {
       if (this.status === 'pending') {
-        this.pending = 'fulfilled';
+        this.status = 'fulfilled';
         this.result = res;
         this.onFulfilledCallbacks.forEach(fn => fn(res));
       }
     }
     const reject = (error) => {
       if (this.status === 'pending') {
-        this.pending = 'rejected';
+        this.status = 'rejected';
         this.result = error;
         this.onRejectedCallbacks.forEach(fn => fn(error));
       }
@@ -25,7 +25,7 @@ class FakePromise {
       reject(err)
     }
   }
-  then(onFulfilled, onReject) {
+  then(onFulfilled, onRejected) {
     return new FakePromise((resolve, reject) => {
       switch (this.status) {
         case 'pending':
