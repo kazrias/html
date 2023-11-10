@@ -32,7 +32,12 @@ class FakePromise {
           this.onFulfilledCallbacks.push(() => {
             try {
               const fulfilledFromLastPromise = onFulfilled(this.result);
-              resolve(fulfilledFromLastPromise);
+              if (fulfilledFromLastPromise instanceof FakePromise) {
+                fulfilledFromLastPromise.then(resolve, reject)
+              }
+              else {
+                resolve(fulfilledFromLastPromise)
+              }
             } catch (err) {
               reject(err);
             }
@@ -40,7 +45,11 @@ class FakePromise {
           this.onRejectedCallbacks.push(() => {
             try {
               const rejectedFromLastPromise = onRejected(this.result);
-              reject(rejectedFromLastPromise);
+              if (rejectedFromLastPromise instanceof Promise) {
+                rejectedFromLastPromise.then(resolve, reject);
+              } else {
+                reject(rejectedFromLastPromise);
+              }
             } catch (err) {
               reject(err);
             }
@@ -49,16 +58,23 @@ class FakePromise {
         case 'fulfilled':
           try {
             const fulfilledFromLastPromise = onFulfilled(this.result);
-            resolve(fulfilledFromLastPromise);
+            if (fulfilledFromLastPromise instanceof Promise) {
+              fulfilledFromLastPromise.then(resolve, reject);
+            } else {
+              resolve(fulfilledFromLastPromise);
+            }
           } catch (err) {
             reject(err);
           }
-
           break;
         case 'rejected':
           try {
-            const rejectedFromLastPromise = onRejected(this.result);
-            reject(rejectedFromLastPromise);
+            const rejectedFromLastPromise = onRejected(this.value);
+            if (rejectedFromLastPromise instanceof Promise) {
+              rejectedFromLastPromise.then(resolve, reject);
+            } else {
+              reject(rejectedFromLastPromise);
+            }
           } catch (err) {
             reject(err);
           }
@@ -68,32 +84,16 @@ class FakePromise {
   }
 }
 
-const p1 = new FakePromise((resolve, reject) => {
-  resolve('resolved!');
-});
-const p2 = new FakePromise((resolve, reject) => {
-  reject('rejected!')
+
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => resolve('resolved first one'), 1000);
 })
 
 p1.then((res) => {
   console.log(res);
-}, (err) => {
-  console.log(err);
-});
-
-const p3 = new FakePromise((resolve, reject) => {
-  setTimeout(() => resolve('resolved!'), 1000);
-});
-p3.then((res) => {
+  return new Promise(resolve => {
+    setTimeout(() => resolve('resolved second one'), 1000);
+  });
+}).then(res => {
   console.log(res);
-}, (err) => {
-  console.log(err);
 });
-
-const p = new FakePromise((resolve, reject) => {
-  setTimeout(() => resolve('resolved first one'), 1000);
-});
-p.then((res) => {
-  console.log(res);
-  return 5
-}).then(res => console.log(res))
