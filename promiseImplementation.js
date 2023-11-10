@@ -26,16 +26,45 @@ class FakePromise {
     }
   }
   then(onFulfilled, onReject) {
-    switch (this.status) {
-      case 'pending':
-        this.onFulfilledCallbacks.push(onFulfilled);
-        this.onRejectedCallbacks.push(onRejected);
-        break;
-      case 'fulfilled':
-        onFulfilled(this.result);
-      case 'rejected':
-        onReject(this.result)
-    }
+    return new FakePromise((resolve, reject) => {
+      switch (this.status) {
+        case 'pending':
+          this.onFulfilledCallbacks.push(() => {
+            try {
+              const fulfilledFromLastPromise = onFulfilled(this.result);
+              resolve(fulfilledFromLastPromise);
+            } catch (err) {
+              reject(err);
+            }
+          });
+          this.onRejectedCallbacks.push(() => {
+            try {
+              const rejectedFromLastPromise = onRejected(this.result);
+              reject(rejectedFromLastPromise);
+            } catch (err) {
+              reject(err);
+            }
+          });
+          break;
+        case 'fulfilled':
+          try {
+            const fulfilledFromLastPromise = onFulfilled(this.result);
+            resolve(fulfilledFromLastPromise);
+          } catch (err) {
+            reject(err);
+          }
+
+          break;
+        case 'rejected':
+          try {
+            const rejectedFromLastPromise = onRejected(this.result);
+            reject(rejectedFromLastPromise);
+          } catch (err) {
+            reject(err);
+          }
+          break;
+      }
+    })
   }
 }
 
