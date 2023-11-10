@@ -84,4 +84,17 @@ class FakePromise {
   }
 }
 
+const p1 = new FakePromise((resolve, reject) => {
+  setTimeout(() => resolve('resolved first one'), 1000)
+})
+
+p1.then((res) => {
+  console.log(res);
+  return new FakePromise(resolve => {
+    setTimeout(() => resolve('resolved second one'), 1000)
+  });
+}).then(res => {
+  console.log(res);
+});
+
 
