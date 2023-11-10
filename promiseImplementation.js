@@ -8,14 +8,14 @@ class FakePromise {
       if (this.status === 'pending') {
         this.pending = 'fulfilled';
         this.result = res;
-        this.onFulfilledCallbacks.forEach(fn => fn(value));
+        this.onFulfilledCallbacks.forEach(fn => fn(res));
       }
     }
     function reject(error) {
       if (this.status === 'pending') {
         this.pending = 'rejected';
         this.result = error;
-        this.onRejectedCallbacks.forEach(fn => fn(value));
+        this.onRejectedCallbacks.forEach(fn => fn(error));
       }
     }
     try {
