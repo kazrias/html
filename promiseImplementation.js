@@ -45,7 +45,7 @@ class FakePromise {
           this.onRejectedCallbacks.push(() => {
             try {
               const rejectedFromLastPromise = onRejected(this.result);
-              if (rejectedFromLastPromise instanceof Promise) {
+              if (rejectedFromLastPromise instanceof FakePromise) {
                 rejectedFromLastPromise.then(resolve, reject);
               } else {
                 reject(rejectedFromLastPromise);
@@ -58,7 +58,7 @@ class FakePromise {
         case 'fulfilled':
           try {
             const fulfilledFromLastPromise = onFulfilled(this.result);
-            if (fulfilledFromLastPromise instanceof Promise) {
+            if (fulfilledFromLastPromise instanceof FakePromise) {
               fulfilledFromLastPromise.then(resolve, reject);
             } else {
               resolve(fulfilledFromLastPromise);
@@ -69,8 +69,8 @@ class FakePromise {
           break;
         case 'rejected':
           try {
-            const rejectedFromLastPromise = onRejected(this.value);
-            if (rejectedFromLastPromise instanceof Promise) {
+            const rejectedFromLastPromise = onRejected(this.result);
+            if (rejectedFromLastPromise instanceof FakePromise) {
               rejectedFromLastPromise.then(resolve, reject);
             } else {
               reject(rejectedFromLastPromise);
@@ -83,3 +83,5 @@ class FakePromise {
     })
   }
 }
+
+
